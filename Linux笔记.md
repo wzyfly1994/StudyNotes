@@ -46,6 +46,6 @@ docker volume ls
 ### Center os 7
 
 ```
-yum -y install vim*   ---安装vim 
+yum -y install vim*       ---安装vim 
 ```
 
