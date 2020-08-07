@@ -88,17 +88,7 @@ docker logs -f --tail=200 jenkins  --日志
 
 docker volume ls   --所有挂载卷
 
-idea 接入CenterOS7 docker
-vim /usr/lib/systemd/system/docker.service 
-ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock \   ---替换
-systemctl daemon-reload   --运行
-systemctl restart docker  
-ps -ef | grep docker    --查看端口是否成功
-firewall-cmd --zone=public --add-port=2375/tcp --permanent -打开2375端口防火墙
-firewall-cmd --reload    ---重载防火墙
-firewall-cmd --zone=public --list-ports  --查看所有开放的端口
-tls证书生成: https://blog.csdn.net/oceanyang520/article/details/101563309
-
+docker cp -a  ${containerName}:${containerDir}  ${hostDir}    ---复制容器文件到宿主机
 
 ```
 
@@ -442,4 +432,22 @@ firewall-cmd --reload
 post测试访问成功
 
 ![](Linux笔记.assets/15.jpg)
+
+
+
+### Ngnix
+
+```
+docker run -d -p 80:80 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf --name nginx  docker.io/nginx:latest
+```
+
+### Jenkins
+
+```
+docker pull jenkins/jenkins:lts
+
+docker run -d -p 8888:8080 -p 50000:50000 -v /data/jenkins:/var/ -v /etc/localtime:/etc/localtime  --name jenkins  jenkins/jenkins:lts
+
+
+```
 
