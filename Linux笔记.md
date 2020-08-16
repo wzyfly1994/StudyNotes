@@ -441,12 +441,50 @@ post测试访问成功
 docker run -d -p 80:80 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf --name nginx  docker.io/nginx:latest
 ```
 
+### consul
+
+```
+docker pull consul
+
+docker run --name consul -d -p 8500:8500 consul
+```
+
+### gitlab
+
+```
+https://www.jianshu.com/p/080a962c35b6
+# gitlab-ce为稳定版本，后面不填写版本则默认pull最新latest版本
+ docker pull gitlab/gitlab-ce
+ 
+ docker run -d  -p 443:443 -p 80:80 -p 222:22 --privileged=true --name gitlab --restart always -v /data/gitlab/config:/etc/gitlab -v /data/gitlab/logs:/var/log/gitlab -v /data/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce
+ 
+# gitlab.rb文件内容默认全是注释
+$ vim /home/gitlab/config/gitlab.rb
+ 
+# 配置http协议所使用的访问地址,不加端口号默认为80
+external_url 'http://10.0.2.15'
+# 配置ssh协议所使用的访问地址和端口
+gitlab_rails['gitlab_ssh_host'] = '10.0.2.15'
+# 此端口是run时22端口映射的222端口
+gitlab_rails['gitlab_shell_ssh_port'] = 222 
+
+```
+
+
+
 ### Jenkins
 
 ```
 docker pull jenkins/jenkins:lts
 
-docker run -d -p 8888:8080 -p 50000:50000 -v /data/jenkins:/var/ -v /etc/localtime:/etc/localtime  --name jenkins  jenkins/jenkins:lts
+chown -R 1000:1000 /data/jenkins/jenkins_home   --修改权限为 1000
+
+docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime  --name jenkins  jenkins/jenkins:lts
+
+--privileged=true 在CentOS7中的安全模块selinux把权限禁掉了，参数给容器加特权
+
+镜像地址
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
 
 
 ```
