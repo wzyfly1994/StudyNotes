@@ -459,7 +459,7 @@ https://www.jianshu.com/p/080a962c35b6
  cd /
  mkdir gitlab
  cd gitlab
- mkdir config logs data 
+ mkdir config logs data   
  
  docker run -d  -p 443:443 -p 80:80 -p 222:22 --privileged=true --name gitlab --restart always -v /data/gitlab/config:/etc/gitlab -v /data/gitlab/logs:/var/log/gitlab -v /data/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce
  
