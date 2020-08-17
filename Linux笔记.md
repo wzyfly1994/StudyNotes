@@ -456,10 +456,15 @@ https://www.jianshu.com/p/080a962c35b6
 # gitlab-ce为稳定版本，后面不填写版本则默认pull最新latest版本
  docker pull gitlab/gitlab-ce
  
+ cd /
+ mkdir gitlab
+ cd gitlab
+ mkdir config logs data 
+ 
  docker run -d  -p 443:443 -p 80:80 -p 222:22 --privileged=true --name gitlab --restart always -v /data/gitlab/config:/etc/gitlab -v /data/gitlab/logs:/var/log/gitlab -v /data/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce
  
 # gitlab.rb文件内容默认全是注释
-$ vim /home/gitlab/config/gitlab.rb
+$ vim /data/gitlab/config/gitlab.rb
  
 # 配置http协议所使用的访问地址,不加端口号默认为80
 external_url 'http://10.0.2.15'
