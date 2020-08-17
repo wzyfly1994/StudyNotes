@@ -446,7 +446,8 @@ docker run -d -p 80:80 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf --name ngi
 ```
 docker pull consul
 
-docker run --name consul -d -p 8500:8500 consul
+# --restart always 开机启动
+docker run --name consul --restart always  -d -p 8500:8500 consul
 ```
 
 ### gitlab
@@ -461,17 +462,24 @@ https://www.jianshu.com/p/080a962c35b6
  cd gitlab
  mkdir config logs data   
  
- docker run -d  -p 443:443 -p 80:80 -p 222:22 --privileged=true --name gitlab --restart always -v /data/gitlab/config:/etc/gitlab -v /data/gitlab/logs:/var/log/gitlab -v /data/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce
+ # --restart always 开机启动
+ 
+ docker run -d  -p 443:443 -p 6561:6561 -p 222:22 --privileged=true --name gitlab  -v /data/gitlab/config:/etc/gitlab -v /data/gitlab/logs:/var/log/gitlab -v /data/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce
  
 # gitlab.rb文件内容默认全是注释
 $ vim /data/gitlab/config/gitlab.rb
  
 # 配置http协议所使用的访问地址,不加端口号默认为80
-external_url 'http://10.0.2.15'
+external_url 'http://10.0.2.15:6561'
 # 配置ssh协议所使用的访问地址和端口
 gitlab_rails['gitlab_ssh_host'] = '10.0.2.15'
 # 此端口是run时22端口映射的222端口
 gitlab_rails['gitlab_shell_ssh_port'] = 222 
+
+//待定配置
+#nginx['listen_port'] = 6561
+# https需要下面这句
+# nginx['redirect_http_to_https_port'] = 6561
 
 ```
 
