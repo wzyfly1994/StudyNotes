@@ -62,6 +62,14 @@ yum install net-tools
 
 ```
 
+命令以及参数的含义：
+run：启动一个镜像容器
+-d：指定容器运行于后台
+-it：-i 和 -t 的缩写；
+-i：以交互模式运行容器，通常与 -t 同时使用
+-t：为容器重新分配一个伪输入终端，通常与 -i 同时使用
+–name：指定容器名字，后续可以通过名字进行容器管理
+
 docker images---查看镜像
 
 docker ps  ---查看容器
@@ -72,7 +80,9 @@ docker pull ${images}  --拉取镜像
 
 docker rmi ${images} --删除镜像
 
-docker exec -it  ${containerName} /bin/bash --进入容器  
+docker exec -it  ${containerName} /bin/bash --进入容器   在容器中打开新的终端，并且可以启动新的进程  退出：exit
+ 
+docker attach ${containerName}  直接进入容器启动终端，不会启动新的进程  退出 Ctrl + P + Q  --exit 会导致容器停止
 
 docker run -d -p port:port -v {挂载目录} --name {容器名字} ${REPOSITORY}:${TAG} ---启动镜像到容器
 
@@ -492,6 +502,9 @@ docker pull jenkins/jenkins:lts
 
 chown -R 1000:1000 /data/jenkins/jenkins_home   --修改权限为 1000
 
+-v /var/run/docker.sock:/var/run/docker.sock 
+-v /usr/bin/docker:/usr/bin/docker
+
 docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime  --name jenkins  jenkins/jenkins:lts
 
 --privileged=true 在CentOS7中的安全模块selinux把权限禁掉了，参数给容器加特权
@@ -499,6 +512,70 @@ docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/je
 镜像地址
 https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
 
+#挂载宿主docker启动
+docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime -v /var/run/docker.sock:/var/run/docker.sock   -v /usr/bin/docker:/usr/bin/docker --name jenkins  jenkins/jenkins:lts
+
+#挂载宿主docker启动 maven
+docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime -v /var/run/docker.sock:/var/run/docker.sock   -v /usr/bin/docker:/usr/bin/docker -v /data/maven/apache-maven-3.6.3:/usr/local/maven --name jenkins  jenkins/jenkins:lts
+
+
+docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime -v /var/run/docker.sock:/var/run/docker.sock   -v /usr/bin/docker:/usr/bin/docker -v /data/maven/apache-maven-3.6.3:/usr/local/maven -v /data/jdk1.8/jdk1.8.0_261:/usr/java/jdk1.8.0_261 --name jenkins  jenkins/jenkins:lts
 
 ```
+
+### Maven
+
+~~~
+宿主机安装
+yum install wget -y 
+
+wget http://mirror.bit.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+	
+tar -xzvf apache-maven-3.6.3-bin.tar.gz
+
+vim /data/maven/apache-maven-3.6.3/conf/settings.xml
+设置镜像
+ <mirror>
+       <id>alimaven</id>
+       <name>aliyun maven</name>
+       <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+       <mirrorOf>central</mirrorOf>       
+ </mirror>
+ 
+vim /etc/profile
+添加环境变量 在文件底部加上
+
+#M2_HOME 为maven安装文件夹
+export M2_HOME=/data/maven/apache-maven-3.6.3 
+export PATH=$PATH:${M2_HOME}/bin
+
+保存并退出编辑，使用下面的命令让修改生效
+source /etc/profile
+
+#检查是否安装成功
+mvn -version
+
+~~~
+
+### Java
+
+~~~
+jdk地址
+https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
+
+docker 启动
+docker run -d -it --name java docker.io/openjdk:8-jdk-alpine
+docker attach 
+
+宿主机安装
+设置环境变量
+vim /etc/profile
+------------------
+export JAVA_HOME=/data/jdk1.8/jdk1.8.0_261
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+------------------
+source /etc/profile
+
+~~~
 
