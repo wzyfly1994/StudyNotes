@@ -100,6 +100,11 @@ docker volume ls   --所有挂载卷
 
 docker cp -a  ${containerName}:${containerDir}  ${hostDir}    ---复制容器文件到宿主机
 
+
+docker build -t docker-demo:v1.0 .    ---构造镜像    . 是上下文路径 上下文路径，是指 docker 在构建镜像，有时候想要使用到本机的文件（比如复制），docker build 命令得知这个路径后，会将路径下的所有内容打包。
+
+docker build -f /path/to/a/Dockerfile .  ---指定Dockerfile
+
 ```
 
 ### IntelliJ IDEA  中Docker 的使用
