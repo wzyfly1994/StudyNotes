@@ -505,6 +505,8 @@ gitlab_rails['gitlab_shell_ssh_port'] = 222
 ```
 docker pull jenkins/jenkins:lts
 
+创建文件夹 /data/jenkins/jenkins_home
+
 chown -R 1000:1000 /data/jenkins/jenkins_home   --修改权限为 1000
 
 -v /var/run/docker.sock:/var/run/docker.sock 
@@ -524,7 +526,41 @@ docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/je
 docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime -v /var/run/docker.sock:/var/run/docker.sock   -v /usr/bin/docker:/usr/bin/docker -v /data/maven/apache-maven-3.6.3:/usr/local/maven --name jenkins  jenkins/jenkins:lts
 
 
-docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  -v /data/jenkins/jenkins_home:/var/jenkins_home  -v /etc/localtime:/etc/localtime -v /var/run/docker.sock:/var/run/docker.sock   -v /usr/bin/docker:/usr/bin/docker -v /data/maven/apache-maven-3.6.3:/usr/local/maven -v /data/jdk1.8/jdk1.8.0_261:/usr/java/jdk1.8.0_261 --name jenkins  jenkins/jenkins:lts
+#建议此配置
+docker run -d -p 8888:8080 -p 50000:50000 --privileged=true  
+-v /data/jenkins/jenkins_home:/var/jenkins_home  
+-v /etc/localtime:/etc/localtime 
+-v /var/run/docker.sock:/var/run/docker.sock   
+-v /usr/bin/docker:/usr/bin/docker   
+-v /etc/sysconfig/docker:/etc/sysconfig/docker
+-v /var/lib/docker:/var/lib/docker
+-v /data/maven/apache-maven-3.6.3:/usr/local/maven 
+-v /data/jdk1.8/jdk1.8.0_261:/usr/java/jdk1.8.0_261 
+--name jenkins  jenkins/jenkins:lts
+
+#如果在容器内执行docker 出现
+Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.40/containers/json: dial unix /var/run/docker.sock: connect: permission denied
+#在宿主机执行
+chmod 777 /var/run/docker.sock
+
+
+Post Steps
+|| true--表示报错了也继续执行
+shell  
+  #!/bin/sh
+  
+  echo '开始打包docker镜像'
+  
+  echo '停止容器'
+  docker stop  docker-demos || true
+  echo '删除容器'
+  docker rm  docker-demos || true
+  echo '删除历史镜像'
+  docker rmi docker-demos:latest || true
+  echo '构造镜像'
+  docker build -t docker-demos:latest .
+  echo '运行容器'
+  docker run -d -p 9155:9155 --name docker-demos docker-demos:latest
 
 ```
 
