@@ -1,0 +1,67 @@
+#!groovy
+pipeline {
+	agent any
+	environment {
+		// 发布脚本目录
+		DEPLOY_SCRIPT_DIR = "/usr/local/software/jenkins/deploy_script_dir"
+		// 项目路径
+		PROJECT_DIR = "${pwd()}/${params.project_name}"
+		// 获取本项目正在使用的docker镜像id。""里面的\$表示字面值$
+		OLD_IMAGES_ID = sh(script: "docker images | grep ${params.project_name} | awk '{print \$3}'", returnStdout: true).trim()
+	}
+	stages {
+		stage('配置初始化') {
+			steps {
+				echo "project_url ${params.project_url}"
+				echo "全部参数 ${params}"
+				echo "当前路径 ${pwd()}"
+
+				// 拉取配置文件
+				dir("${DEPLOY_SCRIPT_DIR}"){
+					git "${GIT_URL}"
+				}
+				sh "chmod a+x ${DEPLOY_SCRIPT_DIR}/java/run.sh"
+			}
+		}
+		stage('克隆代码') {
+			steps {
+				// 递归删除旧的代码
+				// deleteDir()
+
+				// 通过 Pipeline Syntax 生成语法
+				git branch: "${params.git_branch}", credentialsId: '96df8f2c-eee0-456b-8d80-d70c18906b92', url: "${params.git_url}"
+			}
+		}
+		stage('编译代码') {
+			steps {
+				// 单个项目的git工程，项目路径就是当前路径				
+				script {
+					PROJECT_DIR = fileExists("${PROJECT_DIR}") ? "${PROJECT_DIR}" : "${pwd()}"
+				}
+				echo "项目路径 ${PROJECT_DIR}"
+				dir("${PROJECT_DIR}"){
+					sh "/usr/local/software/apache-maven-3.6.0/bin/mvn clean package -Dmaven.test.skip=true"
+				}
+			}
+		}
+		stage('构建Docker镜像') {
+			steps {
+				// 拷贝docker打包文件到jar包所在目录
+				sh "cp ${DEPLOY_SCRIPT_DIR}/java/* ${PROJECT_DIR}/${params.project_url}/target/"
+
+				// 构建镜像
+				dir("${PROJECT_DIR}/${params.project_url}/target"){
+					sh "docker build -t ${params.project_name} ."
+				}
+			}
+		}
+		stage('运行Docker容器') {
+			steps {
+				sh "docker rm -f ${params.project_name} || true"
+				sh "docker run -d --net='host' --restart=always --name=${params.project_name} ${params.project_name}"
+				// sh "docker run -d --net='host' --name=${params.project_name} -m 600m  ${params.project_name}"
+				sh "docker system prune -a"
+			}
+		}
+	}
+}

@@ -1,0 +1,15 @@
+dev:
+  # 端口。必填
+  appServerPort: 8988
+
+  # jvm参数: java 这里的参数 -jar app.jar   。必填
+  jvmOptions: -Djava.security.egd=file:/dev/./urandom -Xms512m -Xmx512m -XX:+UseConcMarkSweepGC
+
+  # 程序参数： java [jvm-options] -jar app.jar 。非必填
+#  programArguments: --service.registry.expose-host=192.168.4.202 --service.registry.consul-host=192.168.4.202
+test:
+  appServerPort: 8988
+  jvmOptions: -Djava.security.egd=file:/dev/./urandom -Xms512m -Xmx512m -XX:+UseConcMarkSweepGC
+  programArguments: --service.registry.expose-host=192.168.4.202 --service.registry.consul-host=192.168.4.202
+
+

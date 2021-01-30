@@ -1,0 +1,44 @@
+#!groovy
+pipeline {
+	agent any
+	environment {
+		// 发布脚本目录
+		deploy_script_dir = "/usr/local/software/jenkins/deploy_script_dir"
+	}	
+	stages {
+		stage('拉取发布配置') {	
+			steps {	
+				echo "全部参数 ${params}"
+				echo "git_branch    ${git_branch}"
+				echo "git_url    ${git_url}"
+				echo "当前目录 ${pwd()}"
+
+				// 在此目录拉取发布配置
+				dir("${deploy_script_dir}"){
+					git "${GIT_URL}"
+				}
+			}
+		}
+		stage('克隆代码') {	
+			steps {
+				git branch: "${params.git_branch}", credentialsId: 'd7f935a1-93e8-443d-a03a-1bd5b72bce27', url: "${params.git_url}"
+			}
+		}
+		stage('编译部署代码') {
+			steps {
+				echo "编译部署代码"
+				dir("${pwd()}"){
+					sh """
+						if [ ${params.need_install} == "true" ];then
+							npm install
+						fi
+						npm run build
+						rm -rf /usr/local/software/nginx/html_dir/${params.project_name}/*
+						cp -r ${pwd()}/dist/* /usr/local/software/nginx/html_dir/${params.project_name}/
+						/usr/local/software/nginx/sbin/nginx -s reload
+					"""
+				}
+			}
+		}		
+	}	
+}
