@@ -105,6 +105,8 @@ docker build -t docker-demo:v1.0 .    ---构造镜像    . 是上下文路径 �
 
 docker build -f /path/to/a/Dockerfile .  ---指定Dockerfile
 
+docker system prune -a  ---清楚docker缓存
+
 ```
 
 ### IntelliJ IDEA  中Docker 的使用
